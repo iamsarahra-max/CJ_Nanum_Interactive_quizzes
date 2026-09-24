@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>올리브영 G.L.C 매장 응대 모바일 퀴즈</title>
+    <style>
+        :root {
+            --oy-green: #9BCE26;
+            --cj-blue: #0055A5;
+            --cj-red: #E02020;
+            --bg-color: #F4F6F8;
+            --card-bg: #FFFFFF;
+            --text-color: #222222;
+        }
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .quiz-container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            padding: 18px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .refresh-btn {
+            background: #E2E8F0;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #4A5568;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #EEEEEE;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+        }
+        .header h1 {
+            font-size: 1.2rem;
+            color: var(--cj-blue);
+            margin: 0 0 4px 0;
+        }
+        .header p {
+            font-size: 0.8rem;
+            color: #666;
+            margin: 0;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #E9ECEF;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: var(--oy-green);
+            transition: width 0.3s ease;
+        }
+        .comic-canvas-container {
+            width: 100%;
+            height: 160px;
+            background-color: #EBF8FF;
+            border: 2px solid #3182CE;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+        .comic-box {
+            background-color: #FFF9E6;
+            border: 1.5px dashed #FFC107;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            font-size: 0.88rem;
+            line-height: 1.4;
+        }
+        .scene-tag {
+            display: inline-block;
+            background-color: var(--cj-blue);
+            color: white;
+            font-weight: bold;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+        .audio-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background-color: var(--oy-green);
+            color: black;
+            font-weight: bold;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+        }
+        .question-title {
+            font-size: 0.98rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .option-btn {
+            background-color: #F8F9FA;
+            border: 1px solid #DEE2E6;
+            padding: 12px 14px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            line-height: 1.3;
+        }
+        .option-btn.correct {
+            background-color: #D4EDDA !important;
+            border-color: #C3E6CB !important;
+            color: #155724;
+            font-weight: bold;
+        }
+        .option-btn.incorrect {
+            background-color: #F8D7DA !important;
+            border-color: #F5C6CB !important;
+            color: #721C24;
+        }
+        .mini-audio-btn {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            padding: 2px 4px;
+            margin-left: 8px;
+        }
+        .feedback {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: none;
+            line-height: 1.4;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback.correct {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border: 1px solid #C8E6C9;
+        }
+        .feedback.incorrect {
+            background-color: #FFEBEE;
+            color: #C62828;
+            border: 1px solid #FFCDD2;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .prev-btn {
+            background-color: #E2E8F0;
+            color: #4A5568;
+        }
+        .next-btn {
+            background-color: var(--cj-blue);
+            color: white;
+        }
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+        .result-score {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--oy-green);
+            margin: 16px 0;
+        }
+        .restart-btn {
+            background-color: var(--cj-blue);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div class="top-bar">
+        <span style="font-size: 0.75rem; color: #718096; font-weight: bold;" id="save-status">💾 자동 저장됨</span>
+        <button class="refresh-btn" onclick="manualRefresh()">🔄 새로고침 (Pull-to-Refresh)</button>
+    </div>
+
+    <div class="header">
+        <h1>올리브영 G.L.C 매장 응대 퀴즈</h1>
+        <p>15문항 스토리 만화 & 리스닝 지원 (모바일 전용)</p>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <div id="quiz-screen">
+        <div class="comic-canvas-container">
+            <canvas id="comicCanvas" width="500" height="160"></canvas>
+        </div>
+
+        <div class="comic-box">
+            <span class="scene-tag" id="scene-tag">장면 1</span>
+            <div id="comic-text">상황 설명이 표시됩니다.</div>
+        </div>
+
+        <button class="audio-btn" onclick="playSituationTTS()">
+            🔊 상황 원어민 발음 듣기
+        </button>
+
+        <div class="question-card">
+            <div class="question-title" id="question-text">질문이 표시됩니다.</div>
+            <div class="options" id="options-container"></div>
+        </div>
+
+        <div class="feedback" id="feedback-box"></div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()">◀ 이전</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()">다음 ▶</button>
+        </div>
+    </div>
+
+    <div class="result-screen" id="result-screen">
+        <h2>🎉 미션 완수!</h2>
+        <p>올리브영 글로벌 매장 응대 퀴즈 결과:</p>
+        <div class="result-score" id="score-text">0 / 15</div>
+        <p id="result-message" style="margin-bottom: 20px; font-weight: bold;">결과 메시지</p>
+        <button class="restart-btn" onclick="restartQuiz()">처음부터 다시 풀기</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // Pattern 1
+        {
+            scene: "에피소드 1: 매장 입점 및 선제 응대",
+            comic: "🎬 [오전 10:00] 올리브영 매장 문이 열리고, 관광객 Sarah가 핸드폰을 보며 들어옵니다.",
+            audioText: "Welcome to Olive Young! Let me help you find something.",
+            cartoonType: "entrance",
+            question: "1. Sarah가 서성일 때, 신입 스태프인 당신이 건넬 친절한 첫 인사는?",
+            options: ["Welcome to Olive Young! Let me help you.", "I check for you right now.", "What do you want to buy?", "Wait a minute, please."],
+            correct: 0,
+            explanation: "한 줄 정답 이유: 'Let me help you'는 내가 주도적으로 도와드리겠다는 가장 친절한 서비스 표현입니다."
+        },
+        {
+            scene: "에피소드 1: 매장 입점 및 선제 응대",
+            comic: "🎬 Sarah가 토너 사진을 보여주며 묻습니다. 'Excuse me, do you have this toner?'",
+            audioText: "Excuse me, do you have this toner? Let me check that for you right away.",
+            cartoonType: "search",
+            question: "2. 토너 재고를 컴퓨터로 바로 확인해 드리겠다고 말할 때 표현은?",
+            options: ["I will look it.", "Let me check that for you right away.", "You can see computer.", "Find it by yourself."],
+            correct: 1,
+            explanation: "한 줄 정답 이유: 'Let me check...' 표현을 쓰면 주도적으로 즉시 확인해 드린다는 신뢰감을 줍니다."
+        },
+        {
+            scene: "에피소드 1: 매장 입점 및 선제 응대",
+            comic: "🎬 토너가 있는 진열대로 Sarah를 직접 에스코트하여 안내하려 합니다.",
+            audioText: "Let me guide you there. This way, please.",
+            cartoonType: "guide",
+            question: "3. '제가 그쪽 위치로 직접 안내해 드릴게요'라고 안내할 때 표현은?",
+            options: ["Go to that section.", "It is over there.", "Let me guide you there.", "You walk this way."],
+            correct: 2,
+            explanation: "한 줄 정답 이유: 'Let me guide you'는 손짓과 함께 정중하게 고객을 에스코트하는 안내 표현입니다."
+        },
+
+        // Pattern 2
+        {
+            scene: "에피소드 2: 프로모션 및 할인 안내",
+            comic: "🎬 [오후 1:00] 관광객 Tom이 마스크팩을 보며 'Is this item on sale?'이라고 묻습니다.",
+            audioText: "Is this item on sale? Yes, it is on sale now.",
+            cartoonType: "sale",
+            question: "4. 마침 그 마스크팩이 오늘 '할인 행사 중'임을 알리는 표현은?",
+            options: ["Yes, it's on sale now.", "Yes, we are selling now.", "Yes, promotion is coming.", "No discount today."],
+            correct: 0,
+            explanation: "한 줄 정답 이유: 'It's on sale'은 현재 할인 중인 상태를 전달하는 정확한 명사 결합 표현입니다."
+        },
+        {
+            scene: "에피소드 2: 프로모션 및 할인 안내",
+            comic: "🎬 Tom이 'Are there any 1+1 items?'라며 1+1 행사에 대해 묻습니다.",
+            audioText: "It is on a buy one get one free promotion.",
+            cartoonType: "bogo",
+            question: "5. '이 상품은 1+1 행사 중입니다'라고 표준 안내할 때 표현은?",
+            options: ["We give one and one.", "It's on a buy-one-get-one-free promotion.", "Buy this and take another.", "It is 1 plus 1 event."],
+            correct: 1,
+            explanation: "한 줄 정답 이유: 1+1 행사는 영문 표준으로 'buy-one-get-one-free promotion'으로 표현합니다."
+        },
+        {
+            scene: "에피소드 2: 프로모션 및 할인 안내",
+            comic: "🎬 Tom이 'How long is this discount?'라며 행사 기간을 묻습니다.",
+            audioText: "It is on promotion until this weekend.",
+            cartoonType: "calendar",
+            question: "6. '이번 주말까지만 행사 진행됩니다'라고 기한을 알릴 때 표현은?",
+            options: ["It's on promotion until this weekend.", "Promotion stops today.", "It's for 10 years.", "We don't know the time."],
+            correct: 0,
+            explanation: "한 줄 정답 이유: 특정 시점까지 지속되는 행사는 'on promotion until ~'을 결합합니다."
+        },
+
+        // Pattern 3
+        {
+            scene: "에피소드 3: 재고 및 서비스 가능 여부",
+            comic: "🎬 [오후 3:30] 관광객 Emily가 립스틱 21호 밝은 색상이 있는지 물어봅니다.",
+            audioText: "Yes, we have it in stock.",
+            cartoonType: "instock",
+            question: "7. 서랍에 재고가 남아있을 때 '네, 재고 있습니다!'라며 알리는 표현은?",
+            options: ["Yes, it is finished.", "Yes, we have it in stock.", "No, we don't have it.", "Maybe somewhere here."],
+            correct: 1,
+            explanation: "한 줄 정답 이유: 매장에 재고가 있음을 나타낼 때는 'we have it in stock' 구문이 완벽합니다."
+        },
+        {
+            scene: "에피소드 3: 재고 및 서비스 가능 여부",
+            comic: "🎬 Emily가 이어서 23호 색상을 찾지만, 아쉽게도 매장 전체 품절입니다.",
+            audioText: "I am afraid we are out of that color.",
+            cartoonType: "outstock",
+            question: "8. 유감의 뜻을 담아 정중하게 '그 색상은 품절입니다'라고 말할 때 표현은?",
+            options: ["No color now.", "I'm afraid we're out of that color.", "Don't buy that color.", "It is broken."],
+            correct: 1,
+            explanation: "한 줄 정답 이유: 품절 안내 시 'I'm afraid we're out of ~'를 쓰면 완곡하고 친절하게 전달됩니다."
+        },
+        {
+            scene: "에피소드 3: 재고 및 서비스 가능 여부",
+            comic: "🎬 Emily가 여권을 보이며 'Can I get Tax Refund here?'라며 택스프리를 묻습니다.",
+            audioText: "Yes, we do offer tax free service here.",
+            cartoonType: "taxfree",
+            question: "9. '네, 저희 매장은 택스프리 서비스를 제공합니다'라고 안내할 때 표현은?",
+            options: ["Yes, tax free is possible.", "Yes, we do offer tax-free service here.", "Tax refund is no.", "You go to airport."],
+            correct: 1,
+            explanation: "한 줄 정답 이유: 전문 매장 서비스 안내 시 'we do offer ~ service'를 사용하면 정중함이 높아집니다."
+        },
+
+        // Pattern 4
+        {
+            scene: "에피소드 4: 고객 혜택 및 증정 안내",
+            comic: "🎬 [오후 5:00] Sarah의 구매 금액이 3만원을 넘었습니다.",
+            audioText: "You can get a sample kit when you spend over 30,000 won.",
+            cartoonType: "gift",
+            question: "10. '3만원 이상 구매 시 무료 샘플 키트를 받으실 수 있어요'라고 안내할 때 표현은?",
+            options: ["I give you sample kit.", "You can get a sample kit when you spend over 30,000 won.", "Sample kit costs 30,000 won.", "No sample for you."],
+            correct: 1,
+            explanation: "한 줄 정답 이유: 고객 중심 혜택 전달은 'You can get + 혜택' 구문을 활용하는 것이 가장 좋습니다."
+        },
+        {
+            scene: "에피소드 4: 고객 혜택 및 증정 안내",
+            comic: "🎬 Sarah가 결제하려는 마스크팩이 1+1 증정 대상임을 안내하려 합니다.",
+            audioText: "You can get one more for free with this item.",
+            cartoonType: "freeone",
+            question: "11. '이 제품은 하나 더 무료로 받으실 수 있습니다'라고 안내할 때 표현은?",
+            options: ["You can get one more for free with this item.", "Buy one more with money.", "One item is expensive.", "Take it away."],
+            correct: 0,
+            explanation: "한 줄 정답 이유: 무료 증정은 'get one more for free' 구문으로 쉽고 명확하게 전달합니다."
+        },
+        {
+            scene: "에피소드 4: 고객 혜택 및 증정 안내",
+            comic: "🎬 Sarah가 방금 산 제품의 반품 및 환불 가능 여부를 물어봅니다.",
+            audioText: "You can get a refund within 15 days with your receipt.",
+            cartoonType: "refund",
+            question: "12. '영수증 지참 시 15일 이내에 환불받으실 수 있습니다'라고 안내할 때 표현은?",
+            options: ["No return ever.", "You can get a refund within 15 days with your receipt.", "I don't know refund.", "Give me money first."],
+            correct: 1,
+            explanation: "한 줄 정답 이유: 환불 권리 및 안내도 'You can get a refund' 구조를 통해 부드럽게 설명합니다."
+        },
+
+        // Pattern 5
+        {
+            scene: "에피소드 5: 대기 시간 및 안내 이동",
+            comic: "🎬 [오후 7:00] 결제 대기줄이 길어져 Tom이 조바심을 냅니다.",
+            audioText: "It will just take a moment.",
+            cartoonType: "wait",
+            question: "13. Tom에게 '잠시만 기다려 주세요, 금방 끝납니다'라고 대기 안내를 할 때 표현은?",
+            options: ["Wait there.", "Stop talking.", "It'll just take a moment.", "It takes 2 hours."],
+            correct: 2,
+            explanation: "한 줄 정답 이유: 단호한 'Wait'보다 'It'll take a moment'가 서비스 어조에 훨씬 어울립니다."
+        },
+        {
+            scene: "에피소드 5: 대기 시간 및 안내 이동",
+            comic: "🎬 텍스리펀 조회 처리를 진행하며 대략적인 소요 시간을 예고해 주려 합니다.",
+            audioText: "It will take around one minute.",
+            cartoonType: "time",
+            question: "14. '약 1분 정도 소요될 예정입니다'라고 안심시켜 줄 때 표현은?",
+            options: ["It will take around 1 minute.", "It spends 1 minute.", "It needs 1 minute time.", "1 minute is long."],
+            correct: 0,
+            explanation: "한 줄 정답 이유: 소요 시간을 예고할 때는 'It will take + 시간' 패턴이 가장 정확합니다."
+        },
+        {
+            scene: "에피소드 5: 대기 시간 및 안내 이동",
+            comic: "🎬 결제를 마친 Tom에게 출구 위치를 직접 같이 이동하며 배웅하려 합니다.",
+            audioText: "Let me take you there. This way, please.",
+            cartoonType: "exit",
+            question: "15. '제가 출구 쪽으로 직접 안내해 드릴게요. 이쪽입니다'라고 배웅할 때 표현은?",
+            options: ["Go to door.", "Let me take you there. This way, please.", "Exit is outside.", "You look for door."],
+            correct: 1,
+            explanation: "한 줄 정답 이유: 직접 이동 에스코트 시 'Let me take you there' 구문이 최고의 친절함 표출입니다."
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let userAnswers = new Array(quizData.length).fill(null);
+
+    // LocalStorage를 활용한 모바일 데이터 유지
+    function saveData() {
+        const data = {
+            index: currentQuestionIndex,
+            score: score,
+            answers: userAnswers
+        };
+        localStorage.setItem("oy_quiz_state", JSON.stringify(data));
+        document.getElementById("save-status").innerText = "💾 저장 완료";
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem("oy_quiz_state");
+        if (saved) {
+            const data = JSON.parse(saved);
+            currentQuestionIndex = data.index || 0;
+            score = data.score || 0;
+            userAnswers = data.answers || new Array(quizData.length).fill(null);
+        }
+    }
+
+    function manualRefresh() {
+        saveData();
+        location.reload();
+    }
+
+    function drawCartoon(type) {
+        const canvas = document.getElementById("comicCanvas");
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        let grad = ctx.createLinearGradient(0, 0, 500, 160);
+        grad.addColorStop(0, "#EBF8FF");
+        grad.addColorStop(1, "#FEFCBF");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = "#3182CE";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(3, 3, canvas.width - 6, canvas.height - 6);
+
+        // 스태프
+        ctx.fillStyle = "#9BCE26";
+        ctx.beginPath(); ctx.arc(120, 120, 35, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#FFE0B2";
+        ctx.beginPath(); ctx.arc(120, 70, 25, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#222";
+        ctx.beginPath(); ctx.arc(112, 65, 3, 0, Math.PI * 2); ctx.arc(128, 65, 3, 0, Math.PI * 2); ctx.fill();
+
+        // 고객
+        ctx.fillStyle = "#3182CE";
+        ctx.beginPath(); ctx.arc(380, 120, 35, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#FFCC80";
+        ctx.beginPath(); ctx.arc(380, 70, 25, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#222";
+        ctx.beginPath(); ctx.arc(372, 65, 3, 0, Math.PI * 2); ctx.arc(388, 65, 3, 0, Math.PI * 2); ctx.fill();
+
+        // 말풍선
+        ctx.fillStyle = "#FFFFFF";
+        ctx.strokeStyle = "#1A202C";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(170, 15, 160, 50, 12); ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle = "#2D3748";
+        ctx.font = "bold 13px Pretendard, sans-serif";
+        ctx.textAlign = "center";
+
+        let bubbleText = "Welcome!";
+        if(type === "entrance") bubbleText = "Welcome to OY! 💚";
+        else if(type === "search") bubbleText = "Checking for you! 🔎";
+        else if(type === "guide") bubbleText = "Follow me! ➡️";
+        else if(type === "sale") bubbleText = "It's ON SALE! 🏷️";
+        else if(type === "bogo") bubbleText = "1 + 1 EVENT! 🎉";
+        else if(type === "calendar") bubbleText = "Until Weekend! 📅";
+        else if(type === "instock") bubbleText = "In Stock Now! 📦";
+        else if(type === "outstock") bubbleText = "Out of Stock 😢";
+        else if(type === "taxfree") bubbleText = "Tax-Free Here! ✈️";
+        else if(type === "gift") bubbleText = "Free Gift! 🎁";
+        else if(type === "freeone") bubbleText = "1 More Free! 🎁";
+        else if(type === "refund") bubbleText = "15 Days Refund 🔄";
+        else if(type === "wait") bubbleText = "Just a moment! ⏱️";
+        else if(type === "time") bubbleText = "Takes 1 minute ⚡";
+        else if(type === "exit") bubbleText = "This way out! 👋";
+
+        ctx.fillText(bubbleText, 250, 44);
+    }
+
+    // 정답 사전 유출 방지: 오직 사용자가 버튼을 누를 때만 음성 재생
+    function playTTS(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function playSituationTTS() {
+        const currentQuiz = quizData[currentQuestionIndex];
+        playTTS(currentQuiz.audioText);
+    }
+
+    function loadQuestion() {
+        window.speechSynthesis.cancel(); // 자동 재생 차단
+        const currentQuiz = quizData[currentQuestionIndex];
+        
+        document.getElementById("progress").style.width = `${((currentQuestionIndex + 1) / quizData.length) * 100}%`;
+        document.getElementById("scene-tag").innerText = currentQuiz.scene;
+        document.getElementById("comic-text").innerText = currentQuiz.comic;
+        document.getElementById("question-text").innerText = currentQuiz.question;
+        
+        drawCartoon(currentQuiz.cartoonType);
+
+        // 이전/다음 버튼 제어
+        document.getElementById("prev-btn").style.visibility = (currentQuestionIndex === 0) ? "hidden" : "visible";
+        document.getElementById("next-btn").innerText = (currentQuestionIndex === quizData.length - 1) ? "결과 보기 🏆" : "다음 ▶";
+
+        const optionsContainer = document.getElementById("options-container");
+        optionsContainer.innerHTML = "";
+
+        const feedbackBox = document.getElementById("feedback-box");
+        feedbackBox.className = "feedback";
+        feedbackBox.style.display = "none";
+
+        const savedAnswer = userAnswers[currentQuestionIndex];
+
+        currentQuiz.options.forEach((option, index) => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            
+            const textSpan = document.createElement("span");
+            textSpan.innerText = option;
+
+            const audioSpan = document.createElement("button");
+            audioSpan.className = "mini-audio-btn";
+            audioSpan.innerText = "🔊";
+            audioSpan.onclick = (e) => {
+                e.stopPropagation();
+                playTTS(option);
+            };
+
+            btn.appendChild(textSpan);
+            btn.appendChild(audioSpan);
+
+            // 이미 답을 선택한 복습 상태 처리
+            if (savedAnswer !== null) {
+                if (index === currentQuiz.correct) {
+                    btn.classList.add("correct");
+                }
+                if (savedAnswer === index && index !== currentQuiz.correct) {
+                    btn.classList.add("incorrect");
+                }
+            }
+
+            btn.onclick = () => selectOption(index);
+            optionsContainer.appendChild(btn);
+        });
+
+        if (savedAnswer !== null) {
+            feedbackBox.innerText = (savedAnswer === currentQuiz.correct ? "🎉 정답입니다! " : "💡 오답입니다. ") + currentQuiz.explanation;
+            feedbackBox.className = "feedback show " + (savedAnswer === currentQuiz.correct ? "correct" : "incorrect");
+        }
+
+        saveData();
+    }
+
+    function selectOption(selectedIndex) {
+        if (userAnswers[currentQuestionIndex] !== null) return; // 이미 답변한 경우 변경 불가
+
+        userAnswers[currentQuestionIndex] = selectedIndex;
+        const currentQuiz = quizData[currentQuestionIndex];
+
+        if (selectedIndex === currentQuiz.correct) {
+            score++;
+        }
+
+        loadQuestion();
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        if (userAnswers[currentQuestionIndex] === null) {
+            alert("답안을 먼저 선택해 주세요!");
+            return;
+        }
+
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById("quiz-screen").style.display = "none";
+        document.getElementById("result-screen").style.display = "block";
+        document.getElementById("score-text").innerText = `${score} / ${quizData.length}`;
+        
+        let msg = "";
+        if(score === 15) msg = "🏆 완벽합니다! 당신은 올리브영 최고의 글로벌 CS 앰버서더입니다!";
+        else if(score >= 11) msg = "👍 훌륭합니다! 글로벌 고객을 완벽히 응대할 수 있습니다!";
+        else msg = "😊 조금만 더 연습하면 멋진 글로벌 매장 스태프가 됩니다!";
+        
+        document.getElementById("result-message").innerText = msg;
+        localStorage.removeItem("oy_quiz_state"); // 종료 시 초기화
+    }
+
+    function restartQuiz() {
+        localStorage.removeItem("oy_quiz_state");
+        currentQuestionIndex = 0;
+        score = 0;
+        userAnswers = new Array(quizData.length).fill(null);
+        document.getElementById("quiz-screen").style.display = "block";
+        document.getElementById("result-screen").style.display = "none";
+        loadQuestion();
+    }
+
+    window.onload = function() {
+        loadData();
+        loadQuestion();
+    };
+</script>
+
+</body>
+</html>
